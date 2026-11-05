@@ -1,4 +1,15 @@
-# Python tracking files
+# Python artifacts
 __pycache__/
 *.pyc
+
+# data folder
+data/
+
+# Local prefix environment
+.conda/
+env/
 venv/
+
+# IDE and OS configurations
+.vscode/
+.DS_Store

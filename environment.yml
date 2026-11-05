@@ -1,0 +1,19 @@
+name: argo-maps
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - xarray
+  - netcdf4
+  - h5py
+  - requests
+  - pytest
+  - ipykernel
+  - argopy
+
+prefix: /Users/taylorhughes/Projects/argo-maps/.conda
