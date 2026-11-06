@@ -6,7 +6,7 @@ import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from argo_maps.metadata import GDAC, PROJECT_ROOT, load_meta, get_sio_wmos
+from argo_maps.metadata import GDAC, PROJECT_ROOT, load_meta, get_sio_wmos, get_ffst_wmos
 
 FIG_DIR = PROJECT_ROOT / "figures"
 CORE_CODES = [873, 875, 876, 877, 848, 878, 844, 837, 871, 870, 869, 861, 
@@ -51,7 +51,74 @@ def plot_map(layers, title):
     ax.set_title(title)
     return fig, ax
 
-# US Argo Floats
+# US Argo Floats by Mission
+if __name__ == "__main__":
+    prof = load_profile_index()
+    now = pd.Timestamp.now(tz="UTC").tz_localize(None)
+    recent = latest_positions(prof, since=now - pd.Timedelta(days=30))
+
+    us = recent[recent["dac"] == "aoml"]
+    core = us[us["profiler_type"].isin(CORE_CODES)]
+    deep = us[us["profiler_type"].isin(DEEP_CODES)]
+    bgc = us[us["profiler_type"].isin(BGC_CODES)]
+
+    fig, ax = plot_map(
+        [
+            (core, "US Core Argo",  dict(s=6, color="tab:blue")),
+            (deep, "US Deep Argo",  dict(s=18, color="tab:red", marker="^")),
+            (bgc, "US BGC Argo",  dict(s=18, color="tab:green", marker="^")),
+        ],
+        title=f"US Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
+    )
+    FIG_DIR.mkdir(exist_ok=True)
+    fig.savefig(FIG_DIR / "us_argo_mission_map.png", dpi=600, bbox_inches="tight")
+    plt.show()
+
+# SIO Argo Floats
+if __name__ == "__main__":
+    prof = load_profile_index()
+    now = pd.Timestamp.now(tz="UTC").tz_localize(None)
+    recent = latest_positions(prof, since=now - pd.Timedelta(days=30))
+
+    us = recent[recent["dac"] == "aoml"]
+    sio = us[us["wmo"].isin(get_sio_wmos(load_meta()))]
+
+    fig, ax = plot_map(
+        [
+            (sio,  "SIO",           dict(s=10, color="tab:blue")),
+        ],
+        title=f"SIO Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
+    )
+    FIG_DIR.mkdir(exist_ok=True)
+    fig.savefig(FIG_DIR / "sio_argo_map.png", dpi=600, bbox_inches="tight")
+    plt.show()
+
+    # SIO Argo Floats by Mission
+if __name__ == "__main__":
+    prof = load_profile_index()
+    now = pd.Timestamp.now(tz="UTC").tz_localize(None)
+    recent = latest_positions(prof, since=now - pd.Timedelta(days=30))
+
+    us = recent[recent["dac"] == "aoml"]
+    sio = us[us["wmo"].isin(get_sio_wmos(load_meta()))]
+    core = sio[sio["profiler_type"].isin(CORE_CODES)]
+    deep = sio[sio["profiler_type"].isin(DEEP_CODES)]
+    bgc = sio[sio["profiler_type"].isin(BGC_CODES)]
+
+    fig, ax = plot_map(
+        [
+            (core, "SIO Core Argo",  dict(s=6, color="tab:blue")),
+            (deep, "SIO Deep Argo",  dict(s=18, color="tab:red", marker="^")),
+            (bgc, "SIO BGC Argo",  dict(s=18, color="tab:green", marker="^")),
+        ],
+        title=f"SIO Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
+    )
+    FIG_DIR.mkdir(exist_ok=True)
+    fig.savefig(FIG_DIR / "sio_argo_mission_map.png", dpi=600, bbox_inches="tight")
+    plt.show()
+
+
+    # FFST & Deep Argo Floats
 if __name__ == "__main__":
     prof = load_profile_index()
     now = pd.Timestamp.now(tz="UTC").tz_localize(None)
@@ -59,38 +126,15 @@ if __name__ == "__main__":
 
     us = recent[recent["dac"] == "aoml"]
     deep = us[us["profiler_type"].isin(DEEP_CODES)]
-    sio = us[us["wmo"].isin(get_sio_wmos(load_meta()))]
+    ffst = us[us["wmo"].isin(get_ffst_wmos(load_meta()))]
 
     fig, ax = plot_map(
         [
-            # (us,   "All US",        dict(s=4,  color="tab:blue")),
-            (sio,  "SIO",           dict(s=10, color="tab:blue")),
-            # (deep, "US Deep Argo",  dict(s=18, color="tab:red", marker="^")),
+            (deep, "US Deep Argo",  dict(s=10, color="tab:red")),
+            (ffst, "FFST Deep Argo",  dict(s=18, color="tab:orange", marker="^")),
         ],
-        title=f"US Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
+        title=f"US Deep Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
     )
     FIG_DIR.mkdir(exist_ok=True)
-    fig.savefig(FIG_DIR / "sio_argo_map.png", dpi=600, bbox_inches="tight")
-    plt.show()
-
-# SIO Argo Floats
-    if __name__ == "__main__":
-    prof = load_profile_index()
-    now = pd.Timestamp.now(tz="UTC").tz_localize(None)
-    recent = latest_positions(prof, since=now - pd.Timedelta(days=30))
-
-    us = recent[recent["dac"] == "aoml"]
-    deep = us[us["profiler_type"].isin(DEEP_CODES)]
-    sio = us[us["wmo"].isin(get_sio_wmos(load_meta()))]
-
-    fig, ax = plot_map(
-        [
-            # (us,   "All US",        dict(s=4,  color="tab:blue")),
-            (sio,  "SIO",           dict(s=10, color="tab:blue")),
-            # (deep, "US Deep Argo",  dict(s=18, color="tab:red", marker="^")),
-        ],
-        title=f"SIO Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
-    )
-    FIG_DIR.mkdir(exist_ok=True)
-    fig.savefig(FIG_DIR / "sio_argo_map.png", dpi=600, bbox_inches="tight")
+    fig.savefig(FIG_DIR / "sio_argo_mission_map.png", dpi=600, bbox_inches="tight")
     plt.show()
