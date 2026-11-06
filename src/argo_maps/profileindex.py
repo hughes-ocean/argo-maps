@@ -1,0 +1,69 @@
+"""Map recently reporting US Argo floats from the GDAC profile index."""
+from functools import cache
+
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import matplotlib.pyplot as plt
+import pandas as pd
+
+from argo_maps.metadata import GDAC, PROJECT_ROOT, load_meta, get_sio_wmos
+
+FIG_DIR = PROJECT_ROOT / "figures"
+DEEP_CODES = [838, 849, 862, 864, 874, 883]
+
+
+@cache
+def load_profile_index() -> pd.DataFrame:
+    """The GDAC global profile index, with dac, wmo, and cycle columns added."""
+    prof = pd.read_csv(f"{GDAC}/ar_index_global_prof.txt", comment="#",
+                       dtype={"file": str, "date": str, "profiler_type": "Int64"})
+    prof["date"] = pd.to_datetime(prof["date"], format="%Y%m%d%H%M%S", errors="coerce")
+    parts = prof["file"].str.split("/")
+    prof["dac"] = parts.str[0]
+    prof["wmo"] = parts.str[1]
+    prof["cycle"] = prof["file"].str.extract(r"_(\d+)D?\.nc$")[0].astype("Int64")
+    return prof
+
+
+def latest_positions(prof: pd.DataFrame, since: pd.Timestamp) -> pd.DataFrame:
+    """Newest profile with a valid position for each float, reported on or after `since`."""
+    fixes = prof.dropna(subset=["latitude", "longitude", "date"])
+    latest = fixes.sort_values("date").groupby("wmo").tail(1)
+    return latest[latest["date"] >= since]
+
+
+def plot_map(layers, title):
+    """layers: list of (DataFrame, label, scatter-style dict), drawn in order."""
+    fig = plt.figure(figsize=(13, 6.5))
+    ax = plt.axes(projection=ccrs.Robinson(central_longitude=-160))
+    ax.set_global()
+    ax.add_feature(cfeature.LAND, facecolor="0.85")
+    ax.coastlines(linewidth=0.4)
+    for df, label, style in layers:
+        ax.scatter(df["longitude"], df["latitude"], transform=ccrs.PlateCarree(),
+                   label=f"{label} ({len(df)})", **style)
+    ax.legend(loc="lower left")
+    ax.set_title(title)
+    return fig, ax
+
+
+if __name__ == "__main__":
+    prof = load_profile_index()
+    now = pd.Timestamp.now(tz="UTC").tz_localize(None)
+    recent = latest_positions(prof, since=now - pd.Timedelta(days=30))
+
+    us = recent[recent["dac"] == "aoml"]
+    deep = us[us["profiler_type"].isin(DEEP_CODES)]
+    sio = us[us["wmo"].isin(get_sio_wmos(load_meta()))]
+
+    fig, ax = plot_map(
+        [
+            (us,   "All US",        dict(s=4,  color="tab:blue")),
+            (sio,  "SIO",           dict(s=10, color="tab:orange")),
+            (deep, "US Deep Argo",  dict(s=18, color="tab:red", marker="^")),
+        ],
+        title=f"US Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
+    )
+    FIG_DIR.mkdir(exist_ok=True)
+    fig.savefig(FIG_DIR / "us_argo_map.png", dpi=200, bbox_inches="tight")
+    plt.show()

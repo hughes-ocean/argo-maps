@@ -1,0 +1,8 @@
+pyproject.toml
+src/argo_maps/__init__.py
+src/argo_maps/metadata.py
+src/argo_maps/profileindex.py
+src/argo_maps.egg-info/PKG-INFO
+src/argo_maps.egg-info/SOURCES.txt
+src/argo_maps.egg-info/dependency_links.txt
+src/argo_maps.egg-info/top_level.txt
