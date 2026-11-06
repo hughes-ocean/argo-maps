@@ -9,7 +9,12 @@ import pandas as pd
 from argo_maps.metadata import GDAC, PROJECT_ROOT, load_meta, get_sio_wmos
 
 FIG_DIR = PROJECT_ROOT / "figures"
-DEEP_CODES = [838, 849, 862, 864, 874, 883]
+CORE_CODES = [873, 875, 876, 877, 848, 878, 844, 837, 871, 870, 869, 861, 
+              860, 857, 856, 858, 865, 863, 831, 843, 836, 835, 834, 842, 
+              841, 839, 891, 890, 889, 888, 880, 854, 872, 852, 851, 853, 
+              879, 847, 846, 882]
+DEEP_CODES = [838, 849, 862, 864, 874, 883, 881]
+BGC_CODES = [885, 884, 887, 886]
 
 
 @cache
@@ -46,7 +51,7 @@ def plot_map(layers, title):
     ax.set_title(title)
     return fig, ax
 
-
+# US Argo Floats
 if __name__ == "__main__":
     prof = load_profile_index()
     now = pd.Timestamp.now(tz="UTC").tz_localize(None)
@@ -58,12 +63,34 @@ if __name__ == "__main__":
 
     fig, ax = plot_map(
         [
-            (us,   "All US",        dict(s=4,  color="tab:blue")),
-            (sio,  "SIO",           dict(s=10, color="tab:orange")),
-            (deep, "US Deep Argo",  dict(s=18, color="tab:red", marker="^")),
+            # (us,   "All US",        dict(s=4,  color="tab:blue")),
+            (sio,  "SIO",           dict(s=10, color="tab:blue")),
+            # (deep, "US Deep Argo",  dict(s=18, color="tab:red", marker="^")),
         ],
         title=f"US Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
     )
     FIG_DIR.mkdir(exist_ok=True)
-    fig.savefig(FIG_DIR / "us_argo_map.png", dpi=200, bbox_inches="tight")
+    fig.savefig(FIG_DIR / "sio_argo_map.png", dpi=600, bbox_inches="tight")
+    plt.show()
+
+# SIO Argo Floats
+    if __name__ == "__main__":
+    prof = load_profile_index()
+    now = pd.Timestamp.now(tz="UTC").tz_localize(None)
+    recent = latest_positions(prof, since=now - pd.Timedelta(days=30))
+
+    us = recent[recent["dac"] == "aoml"]
+    deep = us[us["profiler_type"].isin(DEEP_CODES)]
+    sio = us[us["wmo"].isin(get_sio_wmos(load_meta()))]
+
+    fig, ax = plot_map(
+        [
+            # (us,   "All US",        dict(s=4,  color="tab:blue")),
+            (sio,  "SIO",           dict(s=10, color="tab:blue")),
+            # (deep, "US Deep Argo",  dict(s=18, color="tab:red", marker="^")),
+        ],
+        title=f"SIO Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
+    )
+    FIG_DIR.mkdir(exist_ok=True)
+    fig.savefig(FIG_DIR / "sio_argo_map.png", dpi=600, bbox_inches="tight")
     plt.show()
