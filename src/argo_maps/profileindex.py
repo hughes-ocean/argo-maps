@@ -136,5 +136,5 @@ if __name__ == "__main__":
         title=f"US Deep Argo floats reporting in the 30 days to {now:%Y-%m-%d}",
     )
     FIG_DIR.mkdir(exist_ok=True)
-    fig.savefig(FIG_DIR / "sio_argo_mission_map.png", dpi=600, bbox_inches="tight")
+    fig.savefig(FIG_DIR / "us_argo_deep_ffst_map.png", dpi=600, bbox_inches="tight")
     plt.show()
