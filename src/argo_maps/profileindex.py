@@ -85,7 +85,8 @@ def plot_map(layers, date: pd.Timestamp, title: str | None = None):
     for df, label, style in layers:
         ax.scatter(df["longitude"], df["latitude"], transform=ccrs.PlateCarree(),
                    label=f"{label} ({len(df)})", **style)
-    ax.legend(loc="center left", fontsize=9, framealpha=0.9)
+    ax.legend(loc="lower left", bbox_to_anchor=(0.0, -0.07),
+              fontsize=9, framealpha=0.9)
     ax.set_title(title)
 
     n_total = pd.concat([df["wmo"] for df, _, _ in layers]).nunique()
@@ -128,7 +129,7 @@ if __name__ == "__main__":
 
     fig, ax = plot_map(
         [
-            (sio,  "SIO", dict(CORE_STYLE, s=8))
+            (sio,  "All SIO Floats", dict(CORE_STYLE, s=8))
         ],
         date=now
     )
