@@ -26,12 +26,15 @@ DEEP_STYLE = dict(s=22, color="#d62728", marker="^", edgecolors="white",
                   linewidths=0.4, zorder=5)
 
 
-# FFST figure: every deep float is a small red dot; subsets are rings on top
+# FFST figure: every deep float is a small red dot; subsets are rings on top;
+# every non-US deep float is a small gray dot
 DEEP_BASE_STYLE = dict(s=10, color="#d62728", alpha=0.9, linewidths=0, zorder=3)
 FFST_STYLE = dict(s=55, marker="o", facecolors="none", edgecolors="#1a1a1a",
                   linewidths=0.9, zorder=5)
 PGA_STYLE = dict(s=60, marker="D", facecolors="none", edgecolors="#7b2d8e",
                  linewidths=0.9, zorder=4)
+OTHER_STYLE = dict(s=10, color="0.55", alpha=0.7, linewidths=0, zorder=2)
+
 
 @cache
 def load_profile_index() -> pd.DataFrame:
@@ -85,7 +88,7 @@ def plot_map(layers, date: pd.Timestamp, title: str | None = None):
     for df, label, style in layers:
         ax.scatter(df["longitude"], df["latitude"], transform=ccrs.PlateCarree(),
                    label=f"{label} ({len(df)})", **style)
-    ax.legend(loc="lower left", bbox_to_anchor=(0.0, -0.07),
+    ax.legend(loc="lower left", bbox_to_anchor=(-0.02, -0.07),
               fontsize=9, framealpha=0.9)
     ax.set_title(title)
 
@@ -152,13 +155,17 @@ if __name__ == "__main__":
     save(fig, "sio_argo_mission_map.png")
 
 
-    # US Deep Argo with FFST and PGA highlighted (subsets, not exclusive)
-    ffst = us[us["wmo"].isin(get_ffst_wmos(load_meta()))]
-    pgaff = us[us["wmo"].isin(get_pgaff_wmos(load_meta()))]
+    # US Deep Argo with FFST and PGA highlighted, non-US plotted but downplayed
+    deep_all = recent[recent["profiler_type"].isin(DEEP_CODES)]
+    non_us_deep = deep_all[deep_all["dac"] != "aoml"]
+   
+    ffst = deep[deep["wmo"].isin(get_ffst_wmos(meta))]
+    pgaff = deep[deep["wmo"].isin(get_pgaff_wmos(meta))]
 
     fig, ax = plot_map(
         [
-            (deep, "U.S. Deep Argo", DEEP_BASE_STYLE),   # base layer first
+            (non_us_deep, "Non-U.S. Deep Argo", OTHER_STYLE),   # base layer
+            (deep, "U.S. Deep Argo", DEEP_BASE_STYLE),   # `deep` = US deep, defined above
             (ffst, "FFST Deep Argo", FFST_STYLE),
             (pgaff, "PGAFF Deep Argo", PGA_STYLE),
         ],
