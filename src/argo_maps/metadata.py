@@ -22,6 +22,7 @@ SIO_PATTERN = r"\bSIO\b|Scripps"
 INST_COLS = ["OPERATING_INSTITUTION", "PI_NAME", "FLOAT_OWNER"]
 
 FFST_PATTERN = r"\bFFST\b"
+PGAFF_PATTERN = r"\bPGAFF Deep Argo\b"
 PROJ_COLS = ["PROJECT_NAME"]
 
 def _as_text(x) -> str:
@@ -85,9 +86,11 @@ def get_wmos(meta: pd.DataFrame, pattern: str, cols: list[str]) -> set[str]:
 def get_sio_wmos(meta: pd.DataFrame) -> set[str]:
     return get_wmos(meta, SIO_PATTERN, INST_COLS)
  
- 
 def get_ffst_wmos(meta: pd.DataFrame) -> set[str]:
     return get_wmos(meta, FFST_PATTERN, PROJ_COLS)
+
+def get_pgaff_wmos(meta: pd.DataFrame) -> set[str]:
+    return get_wmos(meta, PGAFF_PATTERN, PROJ_COLS)
 
 
 if __name__ == "__main__":
@@ -96,5 +99,7 @@ if __name__ == "__main__":
     print(meta["PROJECT_NAME"].value_counts().head(20))
     sio_wmos = get_sio_wmos(meta)
     ffst_wmos = get_ffst_wmos(meta)
+    pgaff_wmos = get_pgaff_wmos(meta)
     print(f"{len(sio_wmos)} SIO floats out of {len(meta)}")
     print(f"{len(ffst_wmos)} FFST floats out of {len(meta)}")
+    print(f"{len(pgaff_wmos)} PGAFF floats out of {len(meta)}")

@@ -8,7 +8,7 @@ import matplotlib.ticker as mticker
 import pandas as pd
 from cartopy.mpl.ticker import LatitudeFormatter
 
-from argo_maps.metadata import GDAC, PROJECT_ROOT, load_meta, get_sio_wmos, get_ffst_wmos
+from argo_maps.metadata import GDAC, PROJECT_ROOT, load_meta, get_sio_wmos, get_ffst_wmos, get_pgaff_wmos
 
 FIG_DIR = PROJECT_ROOT / "figures"
 CORE_CODES = [873, 875, 876, 877, 848, 878, 844, 837, 871, 870, 869, 861, 
@@ -17,9 +17,6 @@ CORE_CODES = [873, 875, 876, 877, 848, 878, 844, 837, 871, 870, 869, 861,
               879, 847, 846, 882]
 DEEP_CODES = [838, 849, 862, 864, 874, 883, 881]
 BGC_CODES = [885, 884, 887, 886]
-
-# Placeholder until there is a get_pga_wmos() in argo_maps.metadata
-PGA_WMOS: list[str] = []
 
 # set colors
 CORE_STYLE = dict(s=5, color="#1f77b4", alpha=0.65, linewidths=0, zorder=3)
@@ -88,7 +85,7 @@ def plot_map(layers, date: pd.Timestamp, title: str | None = None):
     for df, label, style in layers:
         ax.scatter(df["longitude"], df["latitude"], transform=ccrs.PlateCarree(),
                    label=f"{label} ({len(df)})", **style)
-    ax.legend(loc="lower left", fontsize=9, framealpha=0.9)
+    ax.legend(loc="center left", fontsize=9, framealpha=0.9)
     ax.set_title(title)
 
     n_total = pd.concat([df["wmo"] for df, _, _ in layers]).nunique()
@@ -156,15 +153,16 @@ if __name__ == "__main__":
 
     # US Deep Argo with FFST and PGA highlighted (subsets, not exclusive)
     ffst = us[us["wmo"].isin(get_ffst_wmos(load_meta()))]
-    pga = us[us["wmo"].isin(PGA_WMOS)]
+    pgaff = us[us["wmo"].isin(get_pgaff_wmos(load_meta()))]
 
     fig, ax = plot_map(
         [
             (deep, "U.S. Deep Argo", DEEP_BASE_STYLE),   # base layer first
             (ffst, "FFST Deep Argo", FFST_STYLE),
-            (pga, "PGA Deep Argo", PGA_STYLE),
+            (pgaff, "PGAFF Deep Argo", PGA_STYLE),
         ],
         date=now,
+        title = f"Deep Argo Fleet: active floats as of {now:%d-%b-%Y}"
     )
     save(fig, "us_argo_deep_ffst_map.png")
 
