@@ -11,12 +11,15 @@ from cartopy.mpl.ticker import LatitudeFormatter
 from argo_maps.metadata import GDAC, PROJECT_ROOT, load_meta, get_sio_wmos, get_ffst_wmos, get_pgaff_wmos
 
 FIG_DIR = PROJECT_ROOT / "figures"
-CORE_CODES = [873, 875, 876, 877, 848, 878, 844, 837, 871, 870, 869, 861, 
-              860, 857, 856, 858, 865, 863, 831, 843, 836, 835, 834, 842, 
-              841, 839, 891, 890, 889, 888, 880, 854, 872, 852, 851, 853, 
-              879, 847, 846, 882]
-DEEP_CODES = [838, 849, 862, 864, 874, 883, 881]
-BGC_CODES = [885, 884, 887, 886]
+CORE_CODES = [831, 834, 835, 836, 837, 839, 841, 842, 844, 846, 847, 848, 
+              851, 852, 853, 854, 856, 857, 858, 860, 861, 863, 865, 869, 
+              870, 871, 873, 875, 876, 877, 878, 879, 880, 881]
+DEEP_CODES = [838, 849, 862, 864, 874, 882, 883]
+BGC_CODES = [884, 885, 886, 887, 888, 889, 890, 891]
+ALT_CODES = [840, 843, 845, 850, 855, 859, 872] # check all
+
+# is 872 (S2X) correctly labeled Alt?
+
 
 # set colors
 CORE_STYLE = dict(s=5, color="#1f77b4", alpha=0.65, linewidths=0, zorder=3)
